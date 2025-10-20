@@ -120,6 +120,82 @@
             transform: scale(0.95);
         }
 
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .volume-label {
+            font-size: 14px;
+            color: #8b7d6b;
+            font-weight: bold;
+        }
+
+        .volume-slider {
+            width: 150px;
+            height: 6px;
+            border-radius: 3px;
+            background: #d9ccc0;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #a8c5b8;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:active {
+            background: #7eb39d;
+            transform: scale(1.1);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #a8c5b8;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease;
+        }
+
+        .volume-slider::-moz-range-thumb:active {
+            background: #7eb39d;
+            transform: scale(1.1);
+        }
+
+        .volume-value {
+            font-size: 14px;
+            color: #8b7d6b;
+            font-weight: bold;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .volume-control {
+                margin-top: 10px;
+            }
+
+            .volume-slider {
+                width: 120px;
+            }
+        }
+
         .game-area {
             flex: 1;
             display: flex;
@@ -485,6 +561,11 @@
                 <button class="btn btn-reset" id="resetBtn">New Game</button>
                 <button class="btn btn-stop" id="stopBtn" style="display: none;">Stop Machine</button>
             </div>
+            <div class="volume-control">
+                <span class="volume-label">🔊</span>
+                <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider">
+                <span class="volume-value" id="volumeValue">50%</span>
+            </div>
         </div>
 
         <div class="game-area">
@@ -522,6 +603,8 @@
         const hapticToggle = document.getElementById('hapticToggle');
         const shakeToggle = document.getElementById('shakeToggle');
         const soundToggle = document.getElementById('soundToggle');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
         const resetBtn = document.getElementById('resetBtn');
         const stopBtn = document.getElementById('stopBtn');
         const machineButton = document.getElementById('machineButton');
@@ -529,6 +612,7 @@
         let hapticEnabled = true;
         let shakeEnabled = true;
         let soundEnabled = true;
+        let soundVolume = 0.5;
         let clothesInMachine = 0;
         let isWashing = false;
         let draggedElement = null;
@@ -606,7 +690,7 @@
             document.addEventListener('mouseup', endDrag);
             document.addEventListener('touchend', endDrag);
 
-            triggerHaptic(45);
+            triggerHaptic(120);
         }
 
         function drag(e) {
@@ -653,7 +737,7 @@
                 draggedElement.remove();
                 draggedElement = null;
 
-                triggerHaptic(75);
+                triggerHaptic(180);
 
                 // Check if all clothes are in machine
                 if (clothesContainer.children.length === 0 && clothesInMachine > 0) {
@@ -689,7 +773,7 @@
             machineButton.textContent = '⏹';
             machineButton.classList.remove('off');
             stopBtn.style.display = 'block';
-            triggerHaptic(90);
+            triggerHaptic(200);
 
             // Keep washing for 40 seconds
             washingTimeout = setTimeout(() => {
@@ -721,8 +805,8 @@
 
             clothesInMachine = 0;
 
-            triggerHaptic(50);
-            triggerHaptic(50);
+            triggerHaptic(120);
+            triggerHaptic(120);
         }
 
         function stopWashing() {
@@ -758,8 +842,8 @@
                 oscillator.frequency.value = 80;
                 oscillator.type = 'sine';
 
-                // Start with low volume
-                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                // Set volume based on slider
+                gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
 
                 oscillator.start();
             } catch (e) {
@@ -788,31 +872,37 @@
             hapticEnabled = !hapticEnabled;
             hapticToggle.textContent = hapticEnabled ? 'Haptic: ON' : 'Haptic: OFF';
             hapticToggle.classList.toggle('active', hapticEnabled);
-            triggerHaptic(45);
+            triggerHaptic(120);
         });
 
         shakeToggle.addEventListener('click', () => {
             shakeEnabled = !shakeEnabled;
             shakeToggle.textContent = shakeEnabled ? 'Shake: ON' : 'Shake: OFF';
             shakeToggle.classList.toggle('active', shakeEnabled);
-            triggerHaptic(45);
+            triggerHaptic(120);
         });
 
         soundToggle.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
             soundToggle.textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
             soundToggle.classList.toggle('active', soundEnabled);
-            triggerHaptic(45);
+            triggerHaptic(120);
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            soundVolume = e.target.value / 100;
+            volumeValue.textContent = e.target.value + '%';
+            triggerHaptic(120);
         });
 
         resetBtn.addEventListener('click', () => {
             initGame();
-            triggerHaptic(45);
+            triggerHaptic(120);
         });
 
         stopBtn.addEventListener('click', () => {
             stopWashing();
-            triggerHaptic(45);
+            triggerHaptic(120);
         });
 
         machineButton.addEventListener('click', () => {
@@ -821,7 +911,7 @@
             } else if (isWashing) {
                 stopWashing();
             }
-            triggerHaptic(45);
+            triggerHaptic(120);
         });
 
         // Start the game

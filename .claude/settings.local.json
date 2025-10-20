@@ -5,7 +5,8 @@
       "Bash(git remote add origin https://github.com/NA-E/laundry-game.git)",
       "Bash(git push origin main)",
       "Bash(git add -A)",
-      "Bash(git commit -m \"Add optional washing machine sound with toggle button\")"
+      "Bash(git commit -m \"Add optional washing machine sound with toggle button\")",
+      "Bash(git commit -m \"Add sound volume slider and significantly increase haptic feedback (120-200ms)\")"
     ],
     "deny": [],
     "ask": []
