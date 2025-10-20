@@ -618,6 +618,7 @@
         let draggedElement = null;
         let offset = { x: 0, y: 0 };
         let washingTimeout = null;
+        let vibrationLoop = null;
         let audioContext = null;
         let oscillator = null;
         let gainNode = null;
@@ -638,6 +639,7 @@
             }
 
             stopWashingSound();
+            stopContinuousVibration();
 
             clothesContainer.innerHTML = '';
             drum.innerHTML = '';
@@ -770,6 +772,7 @@
                 washingMachine.classList.add('shaking');
             }
             startWashingSound();
+            startContinuousVibration();
             machineButton.textContent = '⏹';
             machineButton.classList.remove('off');
             stopBtn.style.display = 'block';
@@ -783,6 +786,7 @@
 
         function finishWashing() {
             stopWashingSound();
+            stopContinuousVibration();
             drum.classList.remove('washing');
             washingMachine.classList.remove('shaking');
             status.textContent = '✨ All clean!';
@@ -857,6 +861,32 @@
                     oscillator.stop();
                 } catch (e) {}
                 oscillator = null;
+            }
+        }
+
+        function startContinuousVibration() {
+            if (!hapticEnabled) return;
+
+            // Vibration pattern: 100ms on, 150ms off, repeats
+            const vibratePattern = [100, 150];
+
+            function repeatVibration() {
+                if (isWashing && navigator.vibrate) {
+                    navigator.vibrate(vibratePattern);
+                    vibrationLoop = setTimeout(repeatVibration, 250);
+                }
+            }
+
+            repeatVibration();
+        }
+
+        function stopContinuousVibration() {
+            if (vibrationLoop) {
+                clearTimeout(vibrationLoop);
+                vibrationLoop = null;
+            }
+            if (navigator.vibrate) {
+                navigator.vibrate(0); // Stop any ongoing vibration
             }
         }
 
