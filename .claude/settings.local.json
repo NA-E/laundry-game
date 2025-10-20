@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(cd /c/Claude Code/laundry_game)",
-      "Bash(git remote add origin https://github.com/NA-E/laundry-game.git)"
+      "Bash(git remote add origin https://github.com/NA-E/laundry-game.git)",
+      "Bash(git push origin main)",
+      "Bash(git add -A)",
+      "Bash(git commit -m \"Add optional washing machine sound with toggle button\")"
     ],
     "deny": [],
     "ask": []

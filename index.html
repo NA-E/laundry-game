@@ -97,6 +97,19 @@
             transform: scale(0.95);
         }
 
+        .btn-sound {
+            background-color: #c9b8d4;
+            color: white;
+        }
+
+        .btn-sound.active {
+            background-color: #a89dae;
+        }
+
+        .btn-sound:active {
+            transform: scale(0.95);
+        }
+
         .btn-stop {
             background-color: #d9a8a8;
             color: white;
@@ -468,6 +481,7 @@
             <div class="controls">
                 <button class="btn btn-haptic" id="hapticToggle">Haptic: ON</button>
                 <button class="btn btn-shake" id="shakeToggle">Shake: ON</button>
+                <button class="btn btn-sound" id="soundToggle">Sound: ON</button>
                 <button class="btn btn-reset" id="resetBtn">New Game</button>
                 <button class="btn btn-stop" id="stopBtn" style="display: none;">Stop Machine</button>
             </div>
@@ -507,17 +521,22 @@
         const status = document.getElementById('status');
         const hapticToggle = document.getElementById('hapticToggle');
         const shakeToggle = document.getElementById('shakeToggle');
+        const soundToggle = document.getElementById('soundToggle');
         const resetBtn = document.getElementById('resetBtn');
         const stopBtn = document.getElementById('stopBtn');
         const machineButton = document.getElementById('machineButton');
 
         let hapticEnabled = true;
         let shakeEnabled = true;
+        let soundEnabled = true;
         let clothesInMachine = 0;
         let isWashing = false;
         let draggedElement = null;
         let offset = { x: 0, y: 0 };
         let washingTimeout = null;
+        let audioContext = null;
+        let oscillator = null;
+        let gainNode = null;
 
         const clothColors = [
             { class: 'cloth-red', emoji: '👕' },
@@ -533,6 +552,8 @@
                 clearTimeout(washingTimeout);
                 washingTimeout = null;
             }
+
+            stopWashingSound();
 
             clothesContainer.innerHTML = '';
             drum.innerHTML = '';
@@ -664,6 +685,7 @@
             if (shakeEnabled) {
                 washingMachine.classList.add('shaking');
             }
+            startWashingSound();
             machineButton.textContent = '⏹';
             machineButton.classList.remove('off');
             stopBtn.style.display = 'block';
@@ -676,6 +698,7 @@
         }
 
         function finishWashing() {
+            stopWashingSound();
             drum.classList.remove('washing');
             washingMachine.classList.remove('shaking');
             status.textContent = '✨ All clean!';
@@ -713,6 +736,46 @@
             finishWashing();
         }
 
+        function startWashingSound() {
+            if (!soundEnabled) return;
+
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                // Stop any existing sound
+                stopWashingSound();
+
+                // Create oscillator for washing machine sound
+                oscillator = audioContext.createOscillator();
+                gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Washing machine frequency (low rumbling sound)
+                oscillator.frequency.value = 80;
+                oscillator.type = 'sine';
+
+                // Start with low volume
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+
+                oscillator.start();
+            } catch (e) {
+                console.log('Sound not available');
+            }
+        }
+
+        function stopWashingSound() {
+            if (oscillator) {
+                try {
+                    oscillator.stop();
+                } catch (e) {}
+                oscillator = null;
+            }
+        }
+
         function triggerHaptic(duration = 100) {
             if (!hapticEnabled) return;
 
@@ -732,6 +795,13 @@
             shakeEnabled = !shakeEnabled;
             shakeToggle.textContent = shakeEnabled ? 'Shake: ON' : 'Shake: OFF';
             shakeToggle.classList.toggle('active', shakeEnabled);
+            triggerHaptic(45);
+        });
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+            soundToggle.classList.toggle('active', soundEnabled);
             triggerHaptic(45);
         });
 
