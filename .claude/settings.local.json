@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c/Claude Code/laundry_game)",
+      "Bash(git remote add origin https://github.com/NA-E/laundry-game.git)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
