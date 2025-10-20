@@ -84,6 +84,19 @@
             transform: scale(0.95);
         }
 
+        .btn-shake {
+            background-color: #d4a8b8;
+            color: white;
+        }
+
+        .btn-shake.active {
+            background-color: #b8809e;
+        }
+
+        .btn-shake:active {
+            transform: scale(0.95);
+        }
+
         .btn-stop {
             background-color: #d9a8a8;
             color: white;
@@ -454,6 +467,7 @@
             <h1 class="title">🧺 Laundry Time</h1>
             <div class="controls">
                 <button class="btn btn-haptic" id="hapticToggle">Haptic: ON</button>
+                <button class="btn btn-shake" id="shakeToggle">Shake: ON</button>
                 <button class="btn btn-reset" id="resetBtn">New Game</button>
                 <button class="btn btn-stop" id="stopBtn" style="display: none;">Stop Machine</button>
             </div>
@@ -492,11 +506,13 @@
         const dropZone = document.getElementById('dropZone');
         const status = document.getElementById('status');
         const hapticToggle = document.getElementById('hapticToggle');
+        const shakeToggle = document.getElementById('shakeToggle');
         const resetBtn = document.getElementById('resetBtn');
         const stopBtn = document.getElementById('stopBtn');
         const machineButton = document.getElementById('machineButton');
 
         let hapticEnabled = true;
+        let shakeEnabled = true;
         let clothesInMachine = 0;
         let isWashing = false;
         let draggedElement = null;
@@ -569,7 +585,7 @@
             document.addEventListener('mouseup', endDrag);
             document.addEventListener('touchend', endDrag);
 
-            triggerHaptic(30);
+            triggerHaptic(45);
         }
 
         function drag(e) {
@@ -616,7 +632,7 @@
                 draggedElement.remove();
                 draggedElement = null;
 
-                triggerHaptic(50);
+                triggerHaptic(75);
 
                 // Check if all clothes are in machine
                 if (clothesContainer.children.length === 0 && clothesInMachine > 0) {
@@ -645,11 +661,13 @@
             status.textContent = 'Washing...';
 
             drum.classList.add('washing');
-            washingMachine.classList.add('shaking');
+            if (shakeEnabled) {
+                washingMachine.classList.add('shaking');
+            }
             machineButton.textContent = '⏹';
             machineButton.classList.remove('off');
             stopBtn.style.display = 'block';
-            triggerHaptic(60);
+            triggerHaptic(90);
 
             // Keep washing for 40 seconds
             washingTimeout = setTimeout(() => {
@@ -707,17 +725,24 @@
             hapticEnabled = !hapticEnabled;
             hapticToggle.textContent = hapticEnabled ? 'Haptic: ON' : 'Haptic: OFF';
             hapticToggle.classList.toggle('active', hapticEnabled);
-            triggerHaptic(30);
+            triggerHaptic(45);
+        });
+
+        shakeToggle.addEventListener('click', () => {
+            shakeEnabled = !shakeEnabled;
+            shakeToggle.textContent = shakeEnabled ? 'Shake: ON' : 'Shake: OFF';
+            shakeToggle.classList.toggle('active', shakeEnabled);
+            triggerHaptic(45);
         });
 
         resetBtn.addEventListener('click', () => {
             initGame();
-            triggerHaptic(30);
+            triggerHaptic(45);
         });
 
         stopBtn.addEventListener('click', () => {
             stopWashing();
-            triggerHaptic(30);
+            triggerHaptic(45);
         });
 
         machineButton.addEventListener('click', () => {
@@ -726,7 +751,7 @@
             } else if (isWashing) {
                 stopWashing();
             }
-            triggerHaptic(30);
+            triggerHaptic(45);
         });
 
         // Start the game
