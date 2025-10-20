@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundry Game for Kids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f0ebe5 0%, #e8dfd7 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 32px;
+            color: #8b7d6b;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .btn-reset {
+            background-color: #d4a5a5;
+            color: white;
+        }
+
+        .btn-reset:active {
+            background-color: #c17777;
+            transform: scale(0.95);
+        }
+
+        .btn-haptic {
+            background-color: #a8c5b8;
+            color: white;
+        }
+
+        .btn-haptic.active {
+            background-color: #7eb39d;
+        }
+
+        .btn-haptic:active {
+            transform: scale(0.95);
+        }
+
+        .btn-stop {
+            background-color: #d9a8a8;
+            color: white;
+        }
+
+        .btn-stop:active {
+            background-color: #c97777;
+            transform: scale(0.95);
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            justify-content: space-around;
+        }
+
+        .laundry-basket {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .basket-label {
+            font-size: 18px;
+            color: #8b7d6b;
+            font-weight: bold;
+        }
+
+        .basket {
+            width: 210px;
+            height: 240px;
+            background: linear-gradient(135deg, #c9a679 0%, #b39169 100%);
+            border-radius: 30px 30px 50px 50px;
+            border: 6px solid #9d7a55;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 20px;
+            overflow: hidden;
+        }
+
+        .clothes-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            align-content: flex-start;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .cloth {
+            width: 65px;
+            height: 65px;
+            border-radius: 10px;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            transition: transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .cloth:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cloth-red {
+            background: linear-gradient(135deg, #d89999 0%, #c97777 100%);
+        }
+
+        .cloth-blue {
+            background: linear-gradient(135deg, #9db8d9 0%, #7a9bc9 100%);
+        }
+
+        .cloth-yellow {
+            background: linear-gradient(135deg, #e8d499 0%, #d9c477 100%);
+        }
+
+        .cloth-green {
+            background: linear-gradient(135deg, #a8d4a8 0%, #85c285 100%);
+        }
+
+        .cloth-pink {
+            background: linear-gradient(135deg, #d9b8d4 0%, #c99ac9 100%);
+        }
+
+        .washing-machine-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            justify-content: flex-start;
+        }
+
+        .machine-label {
+            font-size: 18px;
+            color: #8b7d6b;
+            font-weight: bold;
+        }
+
+        .washing-machine {
+            width: 180px;
+            height: 200px;
+            background: linear-gradient(135deg, #e8d9cc 0%, #d9ccc0 100%);
+            border-radius: 30px;
+            border: 6px solid #9d7a55;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .drum {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f5f0e8 0%, #d9ccc0 100%);
+            border: 4px solid #8b7d6b;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .drum.washing {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .cloth-in-machine {
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-0.4px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(0.4px);
+            }
+        }
+
+        .washing-machine.shaking {
+            animation: shake 0.4s ease-in-out infinite;
+        }
+
+        .machine-button {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #7eb39d 0%, #5a9d7f 100%);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .machine-button:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .machine-button.off {
+            background: linear-gradient(135deg, #c9a8a8 0%, #b9888a 100%);
+        }
+
+        .status {
+            text-align: center;
+            font-size: 16px;
+            color: #8b7d6b;
+            font-weight: bold;
+            height: 25px;
+            min-height: 25px;
+        }
+
+        .drop-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 30px;
+            pointer-events: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .drop-zone.active {
+            background-color: rgba(168, 197, 184, 0.2);
+            pointer-events: auto;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #a8a899;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🧺 Laundry Time</h1>
+            <div class="controls">
+                <button class="btn btn-haptic" id="hapticToggle">Haptic: ON</button>
+                <button class="btn btn-reset" id="resetBtn">New Game</button>
+                <button class="btn btn-stop" id="stopBtn" style="display: none;">Stop Machine</button>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="laundry-basket">
+                <div class="basket-label">Basket</div>
+                <div class="basket">
+                    <div class="clothes-container" id="clothesContainer">
+                        <!-- Clothes will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="washing-machine-section">
+                <div class="machine-label">Washing Machine</div>
+                <div class="washing-machine" id="washingMachine">
+                    <div class="drop-zone" id="dropZone"></div>
+                    <div class="drum" id="drum">
+                        <!-- Clothes will be dragged here -->
+                    </div>
+                    <button class="machine-button" id="machineButton">▶</button>
+                </div>
+                <div class="status" id="status"></div>
+            </div>
+        </div>
+
+        <div class="info-text">Drag clothes from basket to washing machine!</div>
+    </div>
+
+    <script>
+        const clothesContainer = document.getElementById('clothesContainer');
+        const drum = document.getElementById('drum');
+        const washingMachine = document.getElementById('washingMachine');
+        const dropZone = document.getElementById('dropZone');
+        const status = document.getElementById('status');
+        const hapticToggle = document.getElementById('hapticToggle');
+        const resetBtn = document.getElementById('resetBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const machineButton = document.getElementById('machineButton');
+
+        let hapticEnabled = true;
+        let clothesInMachine = 0;
+        let isWashing = false;
+        let draggedElement = null;
+        let offset = { x: 0, y: 0 };
+        let washingTimeout = null;
+
+        const clothColors = [
+            { class: 'cloth-red', emoji: '👕' },
+            { class: 'cloth-blue', emoji: '👔' },
+            { class: 'cloth-yellow', emoji: '🧤' },
+            { class: 'cloth-green', emoji: '🧣' },
+            { class: 'cloth-pink', emoji: '🧥' }
+        ];
+
+        // Initialize game
+        function initGame() {
+            if (washingTimeout) {
+                clearTimeout(washingTimeout);
+                washingTimeout = null;
+            }
+
+            clothesContainer.innerHTML = '';
+            drum.innerHTML = '';
+            clothesInMachine = 0;
+            isWashing = false;
+            status.textContent = '';
+            stopBtn.style.display = 'none';
+            washingMachine.classList.remove('shaking');
+            machineButton.textContent = '▶';
+            machineButton.classList.add('off');
+
+            // Create initial clothes
+            for (let i = 0; i < 8; i++) {
+                const cloth = createCloth(clothColors[i % clothColors.length]);
+                clothesContainer.appendChild(cloth);
+            }
+        }
+
+        function createCloth(colorData) {
+            const cloth = document.createElement('div');
+            cloth.className = `cloth ${colorData.class}`;
+            cloth.textContent = colorData.emoji;
+            cloth.draggable = false;
+
+            cloth.addEventListener('mousedown', startDrag);
+            cloth.addEventListener('touchstart', startDrag);
+
+            return cloth;
+        }
+
+        function startDrag(e) {
+            if (isWashing) return;
+
+            e.preventDefault();
+            draggedElement = this;
+
+            const rect = this.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            offset.x = clientX - rect.left;
+            offset.y = clientY - rect.top;
+
+            this.style.position = 'fixed';
+            this.style.zIndex = '1000';
+            this.style.pointerEvents = 'none';
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+
+            triggerHaptic(1);
+        }
+
+        function drag(e) {
+            if (!draggedElement) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            draggedElement.style.left = (clientX - offset.x) + 'px';
+            draggedElement.style.top = (clientY - offset.y) + 'px';
+
+            // Check if over drop zone
+            const machineRect = washingMachine.getBoundingClientRect();
+            const isOver = clientX >= machineRect.left && clientX <= machineRect.right &&
+                          clientY >= machineRect.top && clientY <= machineRect.bottom;
+
+            dropZone.classList.toggle('active', isOver);
+        }
+
+        function endDrag(e) {
+            if (!draggedElement) return;
+
+            const machineRect = washingMachine.getBoundingClientRect();
+            const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+            const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+
+            const isOver = clientX >= machineRect.left && clientX <= machineRect.right &&
+                          clientY >= machineRect.top && clientY <= machineRect.bottom;
+
+            if (isOver) {
+                // Add cloth to machine
+                const clothCopy = draggedElement.cloneNode(true);
+                clothCopy.className = clothCopy.className.replace('cloth', 'cloth-in-machine');
+                clothCopy.style.position = 'relative';
+                clothCopy.style.left = 'auto';
+                clothCopy.style.top = 'auto';
+                clothCopy.style.pointerEvents = 'auto';
+                clothCopy.removeEventListener('mousedown', startDrag);
+                clothCopy.removeEventListener('touchstart', startDrag);
+
+                drum.appendChild(clothCopy);
+                clothesInMachine++;
+
+                draggedElement.remove();
+                draggedElement = null;
+
+                triggerHaptic(1);
+
+                // Check if all clothes are in machine
+                if (clothesContainer.children.length === 0 && clothesInMachine > 0) {
+                    startWashing();
+                }
+            } else {
+                // Reset cloth position
+                draggedElement.style.position = 'relative';
+                draggedElement.style.left = 'auto';
+                draggedElement.style.top = 'auto';
+                draggedElement.style.pointerEvents = 'auto';
+                draggedElement = null;
+            }
+
+            dropZone.classList.remove('active');
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        function startWashing() {
+            if (isWashing || clothesInMachine === 0) return;
+
+            isWashing = true;
+            status.textContent = 'Washing...';
+
+            drum.classList.add('washing');
+            washingMachine.classList.add('shaking');
+            machineButton.textContent = '⏹';
+            machineButton.classList.remove('off');
+            stopBtn.style.display = 'block';
+            triggerHaptic(1);
+
+            // Keep washing for 40 seconds
+            washingTimeout = setTimeout(() => {
+                finishWashing();
+            }, 40000);
+        }
+
+        function finishWashing() {
+            drum.classList.remove('washing');
+            washingMachine.classList.remove('shaking');
+            status.textContent = '✨ All clean!';
+            machineButton.textContent = '▶';
+            machineButton.classList.add('off');
+            stopBtn.style.display = 'none';
+            isWashing = false;
+            triggerHaptic(1);
+            triggerHaptic(1);
+        }
+
+        function stopWashing() {
+            if (!isWashing) return;
+
+            if (washingTimeout) {
+                clearTimeout(washingTimeout);
+                washingTimeout = null;
+            }
+
+            finishWashing();
+        }
+
+        function triggerHaptic(duration = 100) {
+            if (!hapticEnabled) return;
+
+            if (navigator.vibrate) {
+                navigator.vibrate(duration);
+            }
+        }
+
+        hapticToggle.addEventListener('click', () => {
+            hapticEnabled = !hapticEnabled;
+            hapticToggle.textContent = hapticEnabled ? 'Haptic: ON' : 'Haptic: OFF';
+            hapticToggle.classList.toggle('active', hapticEnabled);
+            triggerHaptic(1);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            initGame();
+            triggerHaptic(1);
+        });
+
+        stopBtn.addEventListener('click', () => {
+            stopWashing();
+            triggerHaptic(1);
+        });
+
+        machineButton.addEventListener('click', () => {
+            if (clothesInMachine > 0 && !isWashing) {
+                startWashing();
+            } else if (isWashing) {
+                stopWashing();
+            }
+            triggerHaptic(1);
+        });
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
