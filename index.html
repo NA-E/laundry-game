@@ -563,8 +563,8 @@
             </div>
             <div class="volume-control">
                 <span class="volume-label">🔊</span>
-                <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider">
-                <span class="volume-value" id="volumeValue">50%</span>
+                <input type="range" min="0" max="100" value="80" class="volume-slider" id="volumeSlider">
+                <span class="volume-value" id="volumeValue">80%</span>
             </div>
         </div>
 
@@ -612,7 +612,7 @@
         let hapticEnabled = true;
         let shakeEnabled = true;
         let soundEnabled = true;
-        let soundVolume = 0.5;
+        let soundVolume = 0.8;
         let clothesInMachine = 0;
         let isWashing = false;
         let draggedElement = null;
@@ -832,9 +832,9 @@
                 // Create audio element for washing machine sound
                 washingMachineAudio = new Audio();
 
-                // Using a free washing machine sound from freesound.org
-                // This is a royalty-free washing machine running sound
-                washingMachineAudio.src = 'https://cdn.freesound.org/previews/536/536549_11861866-lq.mp3';
+                // Using a realistic washing machine sound with water and motor sounds
+                // Royalty-free sound for educational/kids use
+                washingMachineAudio.src = 'https://cdn.freesound.org/previews/686/686939_11861866-hq.mp3';
 
                 washingMachineAudio.loop = true;
                 washingMachineAudio.volume = soundVolume;
