@@ -619,9 +619,7 @@
         let offset = { x: 0, y: 0 };
         let washingTimeout = null;
         let vibrationLoop = null;
-        let audioContext = null;
-        let oscillator = null;
-        let gainNode = null;
+        let washingMachineAudio = null;
 
         const clothColors = [
             { class: 'cloth-red', emoji: '👕' },
@@ -828,39 +826,34 @@
             if (!soundEnabled) return;
 
             try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-
                 // Stop any existing sound
                 stopWashingSound();
 
-                // Create oscillator for washing machine sound
-                oscillator = audioContext.createOscillator();
-                gainNode = audioContext.createGain();
+                // Create audio element for washing machine sound
+                washingMachineAudio = new Audio();
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                // Using a free washing machine sound from freesound.org
+                // This is a royalty-free washing machine running sound
+                washingMachineAudio.src = 'https://cdn.freesound.org/previews/536/536549_11861866-lq.mp3';
 
-                // Washing machine frequency (low rumbling sound)
-                oscillator.frequency.value = 80;
-                oscillator.type = 'sine';
+                washingMachineAudio.loop = true;
+                washingMachineAudio.volume = soundVolume;
 
-                // Set volume based on slider
-                gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
-
-                oscillator.start();
+                washingMachineAudio.play().catch(e => {
+                    console.log('Sound playback failed:', e);
+                });
             } catch (e) {
                 console.log('Sound not available');
             }
         }
 
         function stopWashingSound() {
-            if (oscillator) {
+            if (washingMachineAudio) {
                 try {
-                    oscillator.stop();
+                    washingMachineAudio.pause();
+                    washingMachineAudio.currentTime = 0;
                 } catch (e) {}
-                oscillator = null;
+                washingMachineAudio = null;
             }
         }
 
@@ -916,12 +909,26 @@
             soundEnabled = !soundEnabled;
             soundToggle.textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
             soundToggle.classList.toggle('active', soundEnabled);
+
+            // Stop sound if turning off, start if turning on during washing
+            if (!soundEnabled) {
+                stopWashingSound();
+            } else if (isWashing) {
+                startWashingSound();
+            }
+
             triggerHaptic(120);
         });
 
         volumeSlider.addEventListener('input', (e) => {
             soundVolume = e.target.value / 100;
             volumeValue.textContent = e.target.value + '%';
+
+            // Update volume of currently playing audio
+            if (washingMachineAudio) {
+                washingMachineAudio.volume = soundVolume;
+            }
+
             triggerHaptic(120);
         });
 
