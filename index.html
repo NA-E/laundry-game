@@ -432,6 +432,20 @@
             margin-top: 15px;
         }
 
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            color: #a8a899;
+            font-size: 12px;
+            border-top: 1px solid rgba(168, 168, 153, 0.2);
+        }
+
+        .version {
+            font-weight: bold;
+            color: #8b7d6b;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             body {
@@ -492,6 +506,12 @@
             .info-text {
                 font-size: 12px;
             }
+
+            .footer {
+                margin-top: 15px;
+                padding: 10px;
+                font-size: 11px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -547,6 +567,12 @@
                 top: -12px;
                 right: -12px;
             }
+
+            .footer {
+                margin-top: 10px;
+                padding: 8px;
+                font-size: 10px;
+            }
         }
     </style>
 </head>
@@ -563,8 +589,8 @@
             </div>
             <div class="volume-control">
                 <span class="volume-label">🔊</span>
-                <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider">
-                <span class="volume-value" id="volumeValue">50%</span>
+                <input type="range" min="0" max="100" value="80" class="volume-slider" id="volumeSlider">
+                <span class="volume-value" id="volumeValue">80%</span>
             </div>
         </div>
 
@@ -592,6 +618,10 @@
         </div>
 
         <div class="info-text">Drag clothes from basket to washing machine!</div>
+
+        <div class="footer">
+            <span class="version">Version 10</span>
+        </div>
     </div>
 
     <script>
@@ -612,16 +642,14 @@
         let hapticEnabled = true;
         let shakeEnabled = true;
         let soundEnabled = true;
-        let soundVolume = 0.5;
+        let soundVolume = 0.8;
         let clothesInMachine = 0;
         let isWashing = false;
         let draggedElement = null;
         let offset = { x: 0, y: 0 };
         let washingTimeout = null;
         let vibrationLoop = null;
-        let audioContext = null;
-        let oscillator = null;
-        let gainNode = null;
+        let washingMachineAudio = null;
 
         const clothColors = [
             { class: 'cloth-red', emoji: '👕' },
@@ -828,39 +856,34 @@
             if (!soundEnabled) return;
 
             try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-
                 // Stop any existing sound
                 stopWashingSound();
 
-                // Create oscillator for washing machine sound
-                oscillator = audioContext.createOscillator();
-                gainNode = audioContext.createGain();
+                // Create audio element for washing machine sound
+                washingMachineAudio = new Audio();
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                // Using a realistic washing machine sound with water and motor sounds
+                // Royalty-free sound for educational/kids use
+                washingMachineAudio.src = 'https://cdn.freesound.org/previews/686/686939_11861866-hq.mp3';
 
-                // Washing machine frequency (low rumbling sound)
-                oscillator.frequency.value = 80;
-                oscillator.type = 'sine';
+                washingMachineAudio.loop = true;
+                washingMachineAudio.volume = soundVolume;
 
-                // Set volume based on slider
-                gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
-
-                oscillator.start();
+                washingMachineAudio.play().catch(e => {
+                    console.log('Sound playback failed:', e);
+                });
             } catch (e) {
                 console.log('Sound not available');
             }
         }
 
         function stopWashingSound() {
-            if (oscillator) {
+            if (washingMachineAudio) {
                 try {
-                    oscillator.stop();
+                    washingMachineAudio.pause();
+                    washingMachineAudio.currentTime = 0;
                 } catch (e) {}
-                oscillator = null;
+                washingMachineAudio = null;
             }
         }
 
@@ -916,12 +939,26 @@
             soundEnabled = !soundEnabled;
             soundToggle.textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
             soundToggle.classList.toggle('active', soundEnabled);
+
+            // Stop sound if turning off, start if turning on during washing
+            if (!soundEnabled) {
+                stopWashingSound();
+            } else if (isWashing) {
+                startWashingSound();
+            }
+
             triggerHaptic(120);
         });
 
         volumeSlider.addEventListener('input', (e) => {
             soundVolume = e.target.value / 100;
             volumeValue.textContent = e.target.value + '%';
+
+            // Update volume of currently playing audio
+            if (washingMachineAudio) {
+                washingMachineAudio.volume = soundVolume;
+            }
+
             triggerHaptic(120);
         });
 
